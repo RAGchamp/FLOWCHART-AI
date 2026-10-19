@@ -1,0 +1,12 @@
+# FlowTrace (versions on this computer, 2026-10-18)
+# service (Trace it)
+numpy==2.4.2
+opencv-python==4.13.0.92
+pytesseract==0.3.13
+onnxruntime==1.20.1
+# training kit (datagen, train, eval)
+playwright==1.61.0          # then once: python -m playwright install chromium
+torch==2.9.1                # CPU build is enough
+onnx==1.23.2
+# Tesseract OCR itself is a program, not a pip package: https://github.com/UB-Mannheim/tesseract/wiki
+#   found automatically at C:\Program Files\Tesseract-OCR

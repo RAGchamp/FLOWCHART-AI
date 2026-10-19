@@ -1,0 +1,10 @@
+# kept out of the repository on request
+App-Plain-ver/
+
+# Python caches
+__pycache__/
+*.pyc
+
+# large, re-creatable training outputs (see AI/README.md)
+AI/data/synthetic/
+AI/train/runs/

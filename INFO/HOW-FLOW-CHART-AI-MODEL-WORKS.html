@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the Flow Chart AI Model Works</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/vs2015.min.css">
+<style>
+  :root{
+    --biz-blue:#0d6efd;
+    --biz-blue-light:#6ea8fe;
+    --biz-blue-dark:#084298;
+    --biz-yellow:#ffc107;
+    --biz-red:#dc3545;
+    --biz-green:#198754;
+    --nav-blue:#04264d;
+    --nav-yellow:#ffd60a;
+  }
+  body{ background:#f7f8fa; margin:0; }
+
+  /* Sticky top nav */
+  .topnav{
+    position:sticky; top:0; z-index:1030;
+    background:var(--nav-blue);
+    color:var(--nav-yellow);
+    padding:.9rem 1.5rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 .15rem .5rem rgba(0,0,0,.25);
+  }
+  .topnav .brand{ display:inline-flex; align-items:center; text-decoration:none; }
+  .topnav .brand-logo{ height:44px; width:auto; display:block; }
+  .topnav .tagline{
+    font-weight:600; font-size:1.05rem; color:var(--nav-yellow);
+    letter-spacing:.15em; word-spacing:.6em; font-style:italic;
+  }
+  @media (max-width:576px){
+    .topnav{ flex-direction:column; text-align:center; gap:.4rem; padding:.75rem 1rem; }
+  }
+
+  section[id]{ scroll-margin-top:84px; }
+  html{ scroll-behavior:smooth; }
+
+  .hero{
+    background:linear-gradient(120deg, var(--biz-blue-dark) 0%, var(--biz-blue) 55%, #3d8bfd 100%);
+    color:#fff;
+  }
+  .accent-blue{ border-left:5px solid var(--biz-blue); }
+  .accent-green{ border-left:5px solid var(--biz-green); }
+  .accent-red{ border-left:5px solid var(--biz-red); }
+  .accent-yellow{ border-left:5px solid var(--biz-yellow); }
+
+  .section-title{
+    display:inline-flex; align-items:center; gap:.6rem;
+    padding-bottom:.4rem; border-bottom:3px solid var(--biz-blue);
+    margin-bottom:1.25rem;
+  }
+  .toc-num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:1.8rem; height:1.8rem; border-radius:50%;
+    background:var(--biz-yellow); color:#2b2b2b; font-weight:700; font-size:.85rem;
+    margin-right:.5rem; flex:none;
+  }
+  .toc-list a{ text-decoration:none; color:#212529; }
+  .toc-list a:hover{ color:var(--biz-blue); text-decoration:underline; }
+  .toc-item{ display:flex; align-items:center; padding:.4rem 0; }
+  .back-to-top{ font-size:.85rem; }
+  .color-key-dot{ width:.9rem; height:.9rem; border-radius:50%; display:inline-block; margin-right:.4rem; }
+  table thead th{ background:#eef3fb; }
+  .glossary-table thead th{ background:#04264d; color:#fff; }
+
+  /* VS Code style dark code windows */
+  .code-window{ background:#084298; border-radius:.5rem; overflow:hidden; margin:1rem 0 1.5rem; box-shadow:0 .25rem .75rem rgba(0,0,0,.3); }
+  .code-window .code-titlebar{
+    background:#323233; color:#cccccc; padding:.45rem .9rem; font-size:.8rem;
+    display:flex; align-items:center; gap:.4rem; font-family:'Segoe UI',Roboto,sans-serif;
+  }
+  .code-window .dot{ width:.7rem; height:.7rem; border-radius:50%; display:inline-block; }
+  .dot-red{ background:#ff5f56; } .dot-yellow{ background:#ffbd2e; } .dot-green{ background:#27c93f; }
+  .code-window .code-filename{ margin-left:.5rem; opacity:.85; }
+  .code-window pre{ margin:0 !important; padding:1rem 1.25rem !important; background:#084298 !important; overflow-x:auto; }
+  .code-window code, .code-window code *{ font-family:'Fira Code',Consolas,Monaco,monospace; font-size:.85rem; background:transparent !important; color:#ffffff !important; font-weight:700 !important; text-shadow:none; }
+
+  /* Step-by-step walkthrough boxes */
+  .step-box{
+    background:#e9ecef;
+    border-radius:.5rem;
+    overflow:hidden;
+    margin:0 0 1.25rem;
+    box-shadow:0 .15rem .5rem rgba(0,0,0,.12);
+  }
+  .step-box .step-bar{
+    background:var(--nav-blue);
+    color:#5BF527;
+    font-weight:700;
+    padding:.5rem 1.1rem;
+    font-size:.95rem;
+    letter-spacing:.02em;
+  }
+  .step-box .step-bar .step-title{ font-weight:700; }
+  .step-box .step-body{ padding:1rem 1.25rem; }
+  .step-box .step-body p:last-child{ margin-bottom:0; }
+  .step-box .step-file{
+    font-family:'Fira Code',Consolas,Monaco,monospace;
+    font-size:.8rem;
+    margin-bottom:.7rem;
+  }
+  .step-box .step-file mark{
+    background:var(--biz-yellow);
+    color:#2b2b2b;
+    padding:.15rem .5rem;
+    border-radius:.25rem;
+    font-weight:600;
+  }
+  .step-box .step-file .arrow{ color:#6c757d; margin:0 .3rem; font-family:'Segoe UI',Roboto,sans-serif; }
+
+  footer{ background:var(--nav-blue); }
+  footer a{ color:#fff; }
+
+  .flow{ display:flex; flex-wrap:wrap; gap:.5rem; align-items:stretch; }
+  .flow .flow-box{ flex:1 1 150px; background:#fff; border:2px solid var(--biz-blue); border-radius:.5rem; padding:.6rem .7rem; font-size:.85rem; }
+  .flow .flow-box b{ display:block; color:var(--biz-blue-dark); margin-bottom:.2rem; }
+  .flow .flow-box.user{ border-color:var(--biz-yellow); }
+  .flow .flow-arrow{ align-self:center; color:#6c757d; font-weight:700; }
+  .num-cell{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .kbd-like{ font-family:'Fira Code',Consolas,Monaco,monospace; font-size:.82rem; background:#eef3fb; padding:.05rem .35rem; border-radius:.25rem; white-space:nowrap; }
+  @media (max-width:576px){ .flow .flow-arrow{ display:none; } }
+
+  /* Conceptual diagrams (inline SVG, no external images) */
+  .diagram{ background:#fff; border:1px solid #ced4da; border-radius:.5rem; box-shadow:0 .2rem .6rem rgba(0,0,0,.1); padding:.75rem; }
+  .diagram svg{ display:block; width:100%; height:auto; }
+  .diagram text{ font-family:'Segoe UI',Roboto,Arial,sans-serif; }
+  .diagram-caption{ font-size:.85rem; color:#6c757d; margin-top:.4rem; }
+  .dg-title{ font-size:13px; font-weight:700; fill:#04264d; }
+  .dg-note{ font-size:12px; fill:#343a40; }
+  .dg-small{ font-size:10.5px; fill:#495057; }
+  .dg-lbl{ font-size:12px; font-weight:700; fill:#fff; letter-spacing:.06em; }
+  .dg-line{ stroke:#6c757d; stroke-width:1; fill:none; }
+  .dg-flow{ stroke:#04264d; stroke-width:1.6; fill:none; marker-end:url(#mk); }
+  .dg-nb circle{ fill:#ffc107; }
+  .dg-nb text{ font-size:11px; font-weight:700; fill:#2b2b2b; text-anchor:middle; dominant-baseline:central; }
+  .dg-band{ fill:none; stroke-linecap:butt; stroke-linejoin:round; }
+  .dg-handle{ fill:#fff; stroke:#2563eb; stroke-width:1.5; }
+  .dg-box{ fill:#fff; stroke:#0d6efd; stroke-width:1.5; }
+  .dg-box-green{ fill:#e8f5ee; stroke:#198754; stroke-width:1.8; }
+  .dg-boxtxt{ font-size:12.5px; font-weight:700; fill:#084298; text-anchor:middle; }
+  .dg-boxsub{ font-size:10.5px; fill:#495057; text-anchor:middle; }
+</style>
+</head>
+<body>
+
+<!-- Shared SVG definitions used by every diagram: arrowhead marker and chevron shapes -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="mk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#04264d"/>
+    </marker>
+    <!-- chevron arrowhead pointing along +x, centred on the cut point -->
+    <path id="chev" d="M-8,-14 L-8,-23 L18,0 L-8,23 L-8,14 Z"/>
+    <pattern id="gridPat" width="14" height="14" patternUnits="userSpaceOnUse">
+      <path d="M14 0H0V14" fill="none" stroke="#eceff3" stroke-width="1"/>
+    </pattern>
+  </defs>
+</svg>
+
+<!-- STICKY TOP NAV -->
+<div class="topnav">
+  <span class="brand">
+    <svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" role="img" aria-label="RAG Champ logo">
+      <circle cx="24" cy="24" r="19" fill="#5BF527"/>
+      <path d="M24,5 A19,19 0 0,0 24,43 A9.5,9.5 0 0,0 24,24 A9.5,9.5 0 0,1 24,5 Z" fill="#FA0C00"/>
+      <text x="58" y="33" font-family="'Segoe UI', Verdana, Arial, sans-serif" font-weight="700" font-size="26" letter-spacing="0.3" fill="#ffd60a">RAG Champ</text>
+    </svg>
+  </span>
+  <div class="tagline">FLOW CHART BUILDER</div>
+</div>
+
+<!-- HERO -->
+<header class="hero py-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-9">
+        <span class="badge rounded-pill bg-warning text-dark mb-3">FLOW-CHART-APP · AI · FlowTrace, step by step</span>
+        <h1 class="display-6 fw-bold">How the Flow Chart AI Model Works</h1>
+        <p class="lead mb-0">When you click <strong>Trace it</strong>, a program called <strong>FlowTrace</strong> reads your picture and draws it as editable ribbons, labels, icons and badges. This page explains, step by step, what FlowTrace does with a picture. It then explains in plain English how its model learns to trace flow charts, how it gets better, why training takes a few nights on this computer, what happens during those nights, and how to watch the progress.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container my-5">
+
+  <!-- COLOR KEY -->
+  <div class="mb-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body py-3">
+        <div class="row g-2 small text-center text-md-start">
+          <div class="col-6 col-md-3"><span class="color-key-dot" style="background:var(--biz-blue);"></span>Blue: what FlowTrace does</div>
+          <div class="col-6 col-md-3"><span class="color-key-dot" style="background:var(--biz-red);"></span>Red: a limit or caution</div>
+          <div class="col-6 col-md-3"><span class="color-key-dot" style="background:var(--biz-green);"></span>Green: tip / the takeaway</div>
+          <div class="col-6 col-md-3"><span class="color-key-dot" style="background:var(--biz-yellow);"></span>Yellow: what you do / definitions</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <section id="toc" class="mb-5">
+    <h2 class="section-title">Table of Contents</h2>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="row toc-list">
+          <div class="col-md-6">
+            <div class="toc-item"><span class="toc-num">1</span><a href="#glance">FlowTrace at a Glance</a></div>
+            <div class="toc-item"><span class="toc-num">2</span><a href="#steps">What Happens When You Click Trace it</a></div>
+            <div class="toc-item"><span class="toc-num">3</span><a href="#model">The Model: FlowTrace-Seg</a></div>
+            <div class="toc-item"><span class="toc-num">4</span><a href="#learn">How the Model Learns (Plain English)</a></div>
+            <div class="toc-item"><span class="toc-num">5</span><a href="#practice">Where the Practice Pictures Come From</a></div>
+          </div>
+          <div class="col-md-6">
+            <div class="toc-item"><span class="toc-num">6</span><a href="#improve">How It Improves Over Time</a></div>
+            <div class="toc-item"><span class="toc-num">7</span><a href="#why">Why Training Takes a Few Nights</a></div>
+            <div class="toc-item"><span class="toc-num">8</span><a href="#night">What Happens During the Night</a></div>
+            <div class="toc-item"><span class="toc-num">9</span><a href="#monitor">Watching the Progress</a></div>
+            <div class="toc-item"><span class="toc-num">10</span><a href="#cheat">Commands, Files and Glossary</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. GLANCE -->
+  <section id="glance" class="mb-5">
+    <h2 class="section-title">1. FlowTrace at a Glance</h2>
+    <p>FlowTrace is the "brain" behind <strong>Trace it</strong>. It lives in the folder <code>FLOW-CHART-APP\AI</code> and runs on <strong>your own computer</strong>. Pictures never leave it. The app (<code>App\index.html</code>) and FlowTrace talk to each other through a small local service that you start with <strong>AI\start-flowtrace.bat</strong>.</p>
+    <div class="diagram mb-2">
+      <svg viewBox="0 0 760 170" role="img" aria-label="The app sends the picture and corners to FlowTrace, which returns a plan; the app builds the shapes">
+        <rect x="10" y="45" width="150" height="80" rx="8" class="dg-box"/>
+        <text class="dg-boxtxt" x="85" y="78">The app</text>
+        <text class="dg-boxsub" x="85" y="96">App\index.html</text>
+        <text class="dg-boxsub" x="85" y="111">you click Trace it</text>
+        <path class="dg-flow" d="M 162 72 L 288 72"/>
+        <text class="dg-small" x="225" y="62" text-anchor="middle">picture + 4 corners</text>
+        <rect x="290" y="30" width="200" height="110" rx="8" class="dg-box-green"/>
+        <text class="dg-boxtxt" x="390" y="60">FlowTrace service</text>
+        <text class="dg-boxsub" x="390" y="78">AI\service · 127.0.0.1:8765</text>
+        <text class="dg-boxsub" x="390" y="96">remembered answers</text>
+        <text class="dg-boxsub" x="390" y="111">trained model (or classic vision)</text>
+        <text class="dg-boxsub" x="390" y="126">text reader (Tesseract)</text>
+        <path class="dg-flow" d="M 490 98 L 600 98"/>
+        <text class="dg-small" x="545" y="88" text-anchor="middle">diagram plan</text>
+        <rect x="602" y="45" width="150" height="80" rx="8" class="dg-box"/>
+        <text class="dg-boxtxt" x="677" y="78">Editable shapes</text>
+        <text class="dg-boxsub" x="677" y="96">figure, pieces, labels,</text>
+        <text class="dg-boxsub" x="677" y="111">icons, badges, title</text>
+      </svg>
+    </div>
+    <div class="diagram-caption mb-3">The app only asks; FlowTrace does the seeing and reading; the app builds the shapes with its own tools.</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card shadow-sm accent-yellow h-100"><div class="card-body">
+          <h5 class="card-title">Words used on this page</h5>
+          <ul class="mb-0">
+            <li><strong>Model</strong>: a small program whose behaviour is <em>learned from examples</em> instead of written by hand. Here it's <strong>FlowTrace-Seg</strong>.</li>
+            <li><strong>Classic vision</strong>: hand-written image rules FlowTrace uses until a model has been trained.</li>
+            <li><strong>Training</strong>: showing the model thousands of pictures with their correct answers so it adjusts itself.</li>
+            <li><strong>Answer key / pair</strong>: a picture together with its correct diagram (from <strong>Save training pair</strong>).</li>
+          </ul>
+        </div></div>
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm accent-blue h-100"><div class="card-body">
+          <h5 class="card-title">The three ways FlowTrace can answer</h5>
+          <ol class="mb-0">
+            <li><strong>Remembered answer</strong>: it has seen this exact picture (or slide) before and you corrected it, so it returns your answer. Perfect, but only for that picture.</li>
+            <li><strong>Trained model</strong>: once you have trained one, it marks where the ribbons, labels and center lines are, then exact geometry code builds the diagram.</li>
+            <li><strong>Classic vision</strong>: hand-written rules do the same marking. This is used now, and also as a safety net if a model gives odd results.</li>
+          </ol>
+        </div></div>
+      </div>
+    </div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 2. STEPS -->
+  <section id="steps" class="mb-5">
+    <h2 class="section-title">2. What Happens When You Click Trace it</h2>
+    <p>Each step below is one file in <code>AI\service</code>. On the sample photo the whole run takes about 5–10 seconds (under 1 second when the answer is remembered).</p>
+    <div class="diagram mb-2">
+      <svg viewBox="0 0 760 210" role="img" aria-label="Nine steps from picture to shapes">
+        <g class="dg-nb">
+          <circle cx="40" cy="40" r="12"/><text x="40" y="40">1</text>
+          <circle cx="190" cy="40" r="12"/><text x="190" y="40">2</text>
+          <circle cx="340" cy="40" r="12"/><text x="340" y="40">3</text>
+          <circle cx="490" cy="40" r="12"/><text x="490" y="40">4</text>
+          <circle cx="640" cy="40" r="12"/><text x="640" y="40">5</text>
+          <circle cx="115" cy="140" r="12"/><text x="115" y="140">6</text>
+          <circle cx="265" cy="140" r="12"/><text x="265" y="140">7</text>
+          <circle cx="415" cy="140" r="12"/><text x="415" y="140">8</text>
+          <circle cx="565" cy="140" r="12"/><text x="565" y="140">9</text>
+        </g>
+        <text class="dg-note" x="58" y="44">Straighten</text>
+        <text class="dg-note" x="208" y="44">Remember?</text>
+        <text class="dg-note" x="358" y="44">Find ribbons</text>
+        <text class="dg-note" x="508" y="44">Center lines</text>
+        <text class="dg-note" x="658" y="44">Pieces</text>
+        <text class="dg-small" x="58" y="62">straighten.py</text>
+        <text class="dg-small" x="208" y="62">memory.py</text>
+        <text class="dg-small" x="358" y="62">segment.py</text>
+        <text class="dg-small" x="508" y="62">graph.py</text>
+        <text class="dg-small" x="658" y="62">colors.py</text>
+        <text class="dg-note" x="133" y="144">Read labels</text>
+        <text class="dg-note" x="283" y="144">Icons, badges</text>
+        <text class="dg-note" x="433" y="144">Bands</text>
+        <text class="dg-note" x="583" y="144">Build in the app</text>
+        <text class="dg-small" x="133" y="162">labels.py</text>
+        <text class="dg-small" x="283" y="162">objects.py</text>
+        <text class="dg-small" x="433" y="162">fit.py</text>
+        <text class="dg-small" x="583" y="162">pipeline.py → aiApply()</text>
+        <path class="dg-flow" d="M 140 40 L 172 40"/><path class="dg-flow" d="M 290 40 L 322 40"/><path class="dg-flow" d="M 440 40 L 472 40"/><path class="dg-flow" d="M 590 40 L 622 40"/>
+        <path class="dg-flow" d="M 700 60 C 740 100 140 80 115 122"/>
+        <path class="dg-flow" d="M 215 140 L 247 140"/><path class="dg-flow" d="M 365 140 L 397 140"/><path class="dg-flow" d="M 515 140 L 547 140"/>
+        <text class="dg-small" x="380" y="200" text-anchor="middle">when step 2 recognizes the picture, it jumps straight to step 9</text>
+      </svg>
+    </div>
+    <div class="diagram-caption mb-3">The trace pipeline. Steps 3–8 are skipped when step 2 recognizes the picture.</div>
+
+    <div class="step-box">
+      <div class="step-bar">STEP 1 <span class="step-title">— Straighten the picture</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>straighten.py</mark><span class="arrow">→</span><mark>warp()</mark><span class="arrow">→</span><mark>flatten_light()</mark></div>
+        <p>The 4 orange corners you placed are used to "un-tilt" the photo into a flat rectangle about 1400 pixels wide, like a scanner. Uneven light (a bright spot, a dark corner, a grey screen) is evened out so the paper looks white everywhere.</p>
+        <p class="mb-0">The straightened picture is sent back to the app, which swaps it in behind your canvas so the traced shapes line up with it.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">STEP 2 <span class="step-title">— Have I seen this picture before?</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>memory.py</mark><span class="arrow">→</span><mark>find()</mark><span class="arrow">→</span><mark>transform()</mark></div>
+        <p>FlowTrace compares the picture with every answer key in <code>AI\data\real</code>. It doesn't compare pixel by pixel: it finds thousands of small distinctive spots (corners of letters, tips of arrows) and checks whether they line up with a saved picture. A match still works if you chose slightly different corners, or took a new photo of the same slide.</p>
+        <p class="mb-0">If at least 40 spots agree on one placement, your corrected diagram is moved onto the new picture and returned. You'll see <em>"Recognized: your saved answer …"</em>. You can turn this off with <strong>Use remembered answers</strong>.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">STEP 3 <span class="step-title">— Find the ribbons (this is where the model works)</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>segment.py</mark><span class="arrow">→</span><mark>model()</mark> or <mark>classic()</mark></div>
+        <p>For every pixel, FlowTrace decides: is this part of a ribbon? Is it a letter written on a ribbon? Is it on a ribbon's center line? It also measures how thick the ribbons are, and finds the numbered badges.</p>
+        <p class="mb-0">If a trained model exists (<code>AI\models\flowtrace-seg.onnx</code>), <strong>the model makes these decisions</strong>. Otherwise classic vision does: color thresholds, filling the holes left by letters, and dropping small blobs such as icons.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">STEP 4 <span class="step-title">— Follow each ribbon along its middle, through crossings</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>graph.py</mark><span class="arrow">→</span><mark>thin()</mark><span class="arrow">→</span><mark>pair_ends()</mark><span class="arrow">→</span><mark>walk_chains()</mark></div>
+        <p>The ribbon area is shaved down to a one-pixel line along its middle. Where ribbons cross, this line forms an X. FlowTrace pairs the branches that continue each other most straightly (as a ribbon would), so it goes <em>straight through</em> the crossing instead of turning. Walking the line gives one continuous center line per ribbon. For the sample, that's the whole knot as one closed loop.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">STEP 5 <span class="step-title">— Cut it into pieces, color them, decide which is on top</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>colors.py</mark><span class="arrow">→</span><mark>find_gap_cuts()</mark><span class="arrow">→</span><mark>color_cuts()</mark><span class="arrow">→</span><mark>analyse()</mark></div>
+        <ul class="mb-0">
+          <li><strong>Cuts</strong>: the thin white chevrons across a ribbon, and places where the color changes for good.</li>
+          <li><strong>Flow direction</strong>: which way the chevrons point.</li>
+          <li><strong>Piece colors</strong>: the typical color of each piece, leaving out the letters.</li>
+          <li><strong>Over / under</strong>: at each crossing, the color in the middle belongs to the ribbon on top.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">STEP 6 <span class="step-title">— Read the labels</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>labels.py</mark><span class="arrow">→</span><mark>unroll()</mark><span class="arrow">→</span><mark>read_strips()</mark><span class="arrow">→</span><mark>fix_word()</mark></div>
+        <p>Curved text is hard to read, so each piece is <strong>unrolled into a flat strip</strong>, like peeling a label off a bottle. Each strip is read four ways (both directions, two contrast settings) by <strong>Tesseract</strong>, a free text reader, in a single call. The best reading is snapped to a known process word from <code>AI\datagen\words.txt</code> when it's close ("TRAW" becomes TRAIN, "COLLE" becomes COLLECT).</p>
+        <p class="mb-0">Free text (title, names in the loops) and badge numbers are read the same way.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">STEP 7 <span class="step-title">— Icons, badges, title</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>objects.py</mark><span class="arrow">→</span><mark>loop_interiors()</mark><span class="arrow">→</span><mark>find()</mark></div>
+        <p class="mb-0">The inside of each loop is found. A name inside a loop (Data, ML, DEV, OPS) becomes an icon item; its icon is chosen from the name (Data → cloud, ML → network, DEV → code, OPS → gears). Circles with a number become badges. The biggest line near the top becomes the title, and the line under it becomes the subtitle.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">STEP 8 <span class="step-title">— Editable bands (for "Stop after bands")</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>fit.py</mark><span class="arrow">→</span><mark>fit_chain()</mark></div>
+        <p class="mb-0">Each center line is also turned into the app's own <strong>Arc</strong> and <strong>Bézier</strong> bands: an arc where the line follows a circle, a Bézier curve elsewhere. These are used only when you tick <strong>Stop after bands</strong>, so you can reshape the curves before clicking Snap it.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">STEP 9 <span class="step-title">— The app builds the shapes</span></div>
+      <div class="step-body">
+        <div class="step-file"><mark>pipeline.py</mark><span class="arrow">→</span><mark>App: aiApply()</mark></div>
+        <p class="mb-0">FlowTrace sends back a <strong>plan</strong>: center lines, cut points, piece colors and labels, icons, badges and title, each with a confidence. The app builds them with its own functions (the same ones as the Arrow tool and the panel) as <strong>one undo step</strong>, and lists anything with low confidence under <strong>Needs a look</strong>.</p>
+      </div>
+    </div>
+    <div class="card shadow-sm accent-green">
+      <div class="card-body"><p class="mb-0"><strong>Takeaway:</strong> the model does only one job (step 3: "where are the ribbons, letters and center lines?"). Everything else is exact geometry code. That's why a very small model, one that can be trained on this computer, is enough.</p></div>
+    </div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 3. MODEL -->
+  <section id="model" class="mb-5">
+    <h2 class="section-title">3. The Model: FlowTrace-Seg</h2>
+    <p><strong>FlowTrace-Seg</strong> is a small <em>neural network</em> of a kind called a <strong>U-Net</strong>. It looks at the whole picture and paints three "highlighter" layers over it.</p>
+    <div class="diagram mb-2">
+      <svg viewBox="0 0 760 230" role="img" aria-label="The picture goes down through the encoder to a small summary and back up through the decoder to three output layers">
+        <rect x="10" y="70" width="90" height="90" rx="6" fill="#f1f3f5" stroke="#adb5bd"/>
+        <path d="M 30 115 A 22 22 0 1 1 52 137" fill="none" stroke="#C2410C" stroke-width="9"/>
+        <path d="M 60 100 A 18 18 0 1 0 82 118" fill="none" stroke="#5BA829" stroke-width="9"/>
+        <text class="dg-small" x="55" y="178" text-anchor="middle">picture</text>
+        <path class="dg-flow" d="M 102 115 L 128 115"/>
+        <g fill="#cfe2ff" stroke="#0d6efd">
+          <rect x="130" y="40" width="26" height="150"/><rect x="164" y="60" width="26" height="110"/><rect x="198" y="80" width="26" height="70"/><rect x="232" y="95" width="26" height="40"/>
+          <rect x="266" y="103" width="30" height="24" fill="#0d6efd"/>
+          <rect x="304" y="95" width="26" height="40"/><rect x="338" y="80" width="26" height="70"/><rect x="372" y="60" width="26" height="110"/><rect x="406" y="40" width="26" height="150"/>
+        </g>
+        <path class="dg-line" d="M 143 36 C 143 18 419 18 419 36" stroke-dasharray="4 3"/>
+        <path class="dg-line" d="M 177 56 C 177 40 385 40 385 56" stroke-dasharray="4 3"/>
+        <text class="dg-small" x="194" y="210" text-anchor="middle">shrink: "what is where"</text>
+        <text class="dg-small" x="372" y="210" text-anchor="middle">grow back: "exactly which pixels"</text>
+        <text class="dg-small" x="281" y="150" text-anchor="middle">summary</text>
+        <text class="dg-small" x="281" y="14" text-anchor="middle">shortcuts keep the fine detail</text>
+        <path class="dg-flow" d="M 434 115 L 470 75"/><path class="dg-flow" d="M 434 115 L 470 115"/><path class="dg-flow" d="M 434 115 L 470 155"/>
+        <rect x="472" y="52" width="60" height="44" fill="#000"/><path d="M 485 85 A 14 14 0 1 1 499 92" fill="none" stroke="#fff" stroke-width="7"/>
+        <rect x="472" y="98" width="60" height="44" fill="#000"/><text x="502" y="125" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">TRAIN</text>
+        <rect x="472" y="144" width="60" height="44" fill="#000"/><path d="M 485 177 A 14 14 0 1 1 499 184" fill="none" stroke="#fff" stroke-width="1.5"/>
+        <text class="dg-note" x="545" y="78">ribbon: is this pixel part of a ribbon?</text>
+        <text class="dg-note" x="545" y="124">text: is it a letter on a ribbon?</text>
+        <text class="dg-note" x="545" y="170">center: is it on a ribbon's middle line,</text>
+        <text class="dg-small" x="545" y="185">even where another ribbon covers it?</text>
+      </svg>
+    </div>
+    <div class="diagram-caption mb-3">The U-Net first shrinks the picture to understand the big shapes (whole loops), then grows it back to mark exact pixels. Three output layers, one per question.</div>
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered bg-white">
+        <thead><tr><th>Fact</th><th>Value</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>Size</td><td class="num-cell">about 250,000 numbers ("weights")</td><td>Tiny: big image AIs have billions. Small enough to train on a laptop processor.</td></tr>
+          <tr><td>Input</td><td class="num-cell">256 × 256 px (training), 384 × 384 (tracing)</td><td>Pictures are shrunk to this size before the model looks at them.</td></tr>
+          <tr><td>Outputs</td><td>ribbon, text, center</td><td>Three layers with a 0–1 "how sure" value per pixel.</td></tr>
+          <tr><td>Files</td><td><code>AI\train\model_seg.py</code> → <code>AI\models\flowtrace-seg.onnx</code></td><td>The design; the trained, published model.</td></tr>
+          <tr><td>Safety net</td><td>falls back to classic vision</td><td>If the model's ribbons look very different from classic vision's (area or thickness), that picture uses classic vision.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card shadow-sm accent-red">
+      <div class="card-body"><p class="mb-0"><strong>Today there is no trained model yet.</strong> The panel says "classic vision". It switches to "trained model" after you train, run <code>export_onnx.py</code>, and restart FlowTrace.</p></div>
+    </div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 4. LEARN -->
+  <section id="learn" class="mb-5">
+    <h2 class="section-title">4. How the Model Learns (Plain English)</h2>
+    <p>Think of a student doing practice sheets that come with an answer key. The model starts out <strong>knowing nothing</strong>: its 250,000 numbers are random, and its first guesses are noise. Learning is the same small loop, repeated hundreds of thousands of times:</p>
+    <div class="diagram mb-2">
+      <svg viewBox="0 0 760 250" role="img" aria-label="The learning loop: show a picture, the model guesses, compare with the answer, nudge the numbers, repeat">
+        <circle cx="380" cy="125" r="88" fill="none" stroke="#dee2e6" stroke-width="2"/>
+        <g class="dg-nb"><circle cx="380" cy="37" r="12"/><text x="380" y="37">1</text><circle cx="468" cy="125" r="12"/><text x="468" y="125">2</text><circle cx="380" cy="213" r="12"/><text x="380" y="213">3</text><circle cx="292" cy="125" r="12"/><text x="292" y="125">4</text></g>
+        <path class="dg-flow" d="M 398 42 A 88 88 0 0 1 460 105"/>
+        <path class="dg-flow" d="M 462 145 A 88 88 0 0 1 398 208"/>
+        <path class="dg-flow" d="M 362 208 A 88 88 0 0 1 298 145"/>
+        <path class="dg-flow" d="M 300 105 A 88 88 0 0 1 362 42"/>
+        <text class="dg-note" x="400" y="22">Show a practice picture</text>
+        <text class="dg-small" x="400" y="10">(made to look like a photo)</text>
+        <text class="dg-note" x="488" y="122">The model guesses the 3 layers</text>
+        <text class="dg-small" x="488" y="138">(at first: random noise)</text>
+        <text class="dg-note" x="400" y="238">Compare with the answer key → "loss"</text>
+        <text class="dg-small" x="400" y="226" text-anchor="start">how wrong was each pixel?</text>
+        <text class="dg-note" x="40" y="118">Nudge every number a tiny bit</text>
+        <text class="dg-small" x="40" y="134">in the direction that makes it</text>
+        <text class="dg-small" x="40" y="148">less wrong next time</text>
+        <text class="dg-title" x="380" y="122" text-anchor="middle">repeat</text>
+        <text class="dg-small" x="380" y="138" text-anchor="middle">≈ 9,000 times a night</text>
+      </svg>
+    </div>
+    <div class="diagram-caption mb-3">One "step" of training. The nudge is small on purpose: many small corrections add up to a model that works on pictures it has never seen.</div>
+    <ol>
+      <li><strong>Show a picture.</strong> A practice diagram is made to look like a phone photo of a slide: tilted, blurred, with uneven light (section 5).</li>
+      <li><strong>The model guesses.</strong> It paints its three layers: ribbon, text, center line.</li>
+      <li><strong>Mark the guess.</strong> The guess is compared with the exact answer, pixel by pixel. The total "wrongness" is one number called the <strong>loss</strong>. Lower is better.</li>
+      <li><strong>Nudge.</strong> Mathematics (the "gradient") tells, for each of the 250,000 numbers, which way to move it to make the loss a little smaller. Every number is moved a tiny bit that way.</li>
+    </ol>
+    <p>Pictures are shown 8 at a time (a <strong>batch</strong>). Going once through all the practice pictures is an <strong>epoch</strong>. After many epochs the model has learned what ribbons look like in general: their thickness, their smooth curves, white letters on color, and how one ribbon continues under another. That's why it can then trace <em>new</em> pictures, not just the practice ones.</p>
+    <div class="row g-3">
+      <div class="col-md-6"><div class="card shadow-sm accent-blue h-100"><div class="card-body">
+        <h5 class="card-title">Learning vs remembering</h5>
+        <p class="mb-0"><strong>Remembered answers</strong> (step 2) store your corrected diagrams and give them back for <em>that</em> picture. <strong>Learning</strong> changes the model so it gets better at <em>every</em> picture. You need both: memory for diagrams you use again and again, learning for new ones.</p>
+      </div></div></div>
+      <div class="col-md-6"><div class="card shadow-sm accent-yellow h-100"><div class="card-body">
+        <h5 class="card-title">The exam it never studies for</h5>
+        <p class="mb-0">A small set of pictures (the <strong>validation</strong> set) is never used for nudging. After each epoch the model is tested on them. If it does well on pictures it never practised on, it has really learned, not just memorized the practice sheets.</p>
+      </div></div></div>
+    </div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 5. PRACTICE -->
+  <section id="practice" class="mb-5">
+    <h2 class="section-title">5. Where the Practice Pictures Come From</h2>
+    <p>Normally, someone has to label thousands of pictures by hand. FlowTrace avoids that: <strong>the Flow Chart App draws its own practice pictures</strong>, so every answer key is exact, even for the parts of a ribbon hidden under another one.</p>
+    <div class="flow mb-3">
+      <div class="flow-box"><b>random_doc.js</b>invents a diagram: knot, rings or serpentine; random colors, labels, arrow styles, icons, badges</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><b>The app itself</b>Snap it, cuts and piece styles, exactly as you would</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><b>render.py</b>saves the picture + 3 answer layers (ribbon, labels, center lines)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box"><b>dataset.py</b>makes it look like a photo, freshly each time</div>
+    </div>
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered bg-white">
+        <thead><tr><th>Source</th><th>How many</th><th>What it teaches</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Synthetic</strong>: <code>AI\data\synthetic</code> (render.py)</td><td class="num-cell">20,000 + 1,000 for the exam</td><td>The general idea of ribbons, crossings and labels, in endless variety. Takes about 2–3 hours to make.</td></tr>
+          <tr><td><strong>Photo look</strong>: added during training (dataset.py)</td><td>new every time</td><td>Tilt, blur, glare, grey screens, moiré stripes, JPEG blockiness, title bars and side text. So the same practice picture never looks the same twice.</td></tr>
+          <tr><td><strong>Your real pairs</strong>: <code>AI\data\real</code> (Save training pair)</td><td class="num-cell">aim for 60–100</td><td>What <em>your</em> pictures really look like. Each one counts 20 times during training. About 70% are used for practice and 30% are kept as the frozen test set (section 6).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 6. IMPROVE -->
+  <section id="improve" class="mb-5">
+    <h2 class="section-title">6. How It Improves Over Time</h2>
+    <div class="diagram mb-2">
+      <svg viewBox="0 0 760 170" role="img" aria-label="The improvement cycle: trace, correct, save pair, retrain, score">
+        <g>
+          <rect x="10" y="60" width="120" height="50" rx="8" class="dg-box"/><text class="dg-boxtxt" x="70" y="90">Trace it</text>
+          <rect x="160" y="60" width="120" height="50" rx="8" class="dg-box"/><text class="dg-boxtxt" x="220" y="83">You correct</text><text class="dg-boxsub" x="220" y="99">Needs a look list</text>
+          <rect x="310" y="60" width="130" height="50" rx="8" class="dg-box"/><text class="dg-boxtxt" x="375" y="83">Save training pair</text><text class="dg-boxsub" x="375" y="99">→ AI\data\real</text>
+          <rect x="470" y="60" width="120" height="50" rx="8" class="dg-box-green"/><text class="dg-boxtxt" x="530" y="83">Train again</text><text class="dg-boxsub" x="530" y="99">a night or two</text>
+          <rect x="620" y="60" width="130" height="50" rx="8" class="dg-box-green"/><text class="dg-boxtxt" x="685" y="83">score.py</text><text class="dg-boxsub" x="685" y="99">better? publish it</text>
+        </g>
+        <path class="dg-flow" d="M 130 85 L 158 85"/><path class="dg-flow" d="M 280 85 L 308 85"/><path class="dg-flow" d="M 440 85 L 468 85"/><path class="dg-flow" d="M 590 85 L 618 85"/>
+        <path class="dg-flow" d="M 685 112 C 685 160 70 160 70 114"/>
+        <text class="dg-small" x="378" y="152" text-anchor="middle">each round, the next picture needs fewer corrections</text>
+        <text class="dg-small" x="375" y="40" text-anchor="middle">the saved pair is also remembered right away</text>
+      </svg>
+    </div>
+    <div class="diagram-caption mb-3">The improvement cycle. Your corrections are the most valuable training data there is.</div>
+    <div class="row g-3 mb-3">
+      <div class="col-md-6"><div class="card shadow-sm accent-green h-100"><div class="card-body">
+        <h5 class="card-title">What training improves</h5>
+        <ul class="mb-0">
+          <li>Finding ribbons in messy photos: glare, angles, blur, 3-D shading, gradients.</li>
+          <li>Following ribbons through crossings (the center layer is trained on the hidden parts too).</li>
+          <li>Telling letters from ribbon, so pieces and colors come out cleaner.</li>
+          <li>Fewer false cuts at crossings.</li>
+        </ul>
+      </div></div></div>
+      <div class="col-md-6"><div class="card shadow-sm accent-red h-100"><div class="card-body">
+        <h5 class="card-title">What it does not improve (yet)</h5>
+        <ul class="mb-0">
+          <li><strong>Which letters a label spells</strong>: that's Tesseract (step 6). Helped by sharper pictures and by adding your words to <code>words.txt</code>. A planned next step is to train a small label reader of our own.</li>
+          <li>Box-and-arrow flowcharts: the app has no box tools.</li>
+        </ul>
+      </div></div></div>
+    </div>
+    <h5>Measuring improvement: score.py</h5>
+    <p>Pairs in <code>AI\data\real\test</code> are the <strong>frozen test set</strong>. They are never trained on, so they give an honest score. Run <code>python score.py</code> before and after each training. It prints a table and writes <code>AI\eval\report.html</code> with side-by-side pictures.</p>
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered bg-white">
+        <thead><tr><th>Column</th><th>Meaning</th><th class="num-cell">Target</th><th class="num-cell">Sample photo today</th></tr></thead>
+        <tbody>
+          <tr><td>ribbonIoU</td><td>How well the traced ribbon area overlaps the true one (1.00 = perfect)</td><td class="num-cell">≥ 0.85</td><td class="num-cell">0.95</td></tr>
+          <tr><td>center</td><td>Distance of traced center lines from the true ones, in ribbon thicknesses</td><td class="num-cell">≤ 0.25</td><td class="num-cell">0.00</td></tr>
+          <tr><td>labelP / labelR</td><td>Share of labels read exactly right</td><td class="num-cell">≈ 0.9</td><td class="num-cell">0.75</td></tr>
+          <tr><td>badges, title</td><td>Badge numbers found; title text right</td><td class="num-cell">all</td><td class="num-cell">4/4, yes</td></tr>
+          <tr><td>sec</td><td>Seconds to trace</td><td class="num-cell">≤ 20</td><td class="num-cell">≈ 5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card shadow-sm accent-yellow"><div class="card-body"><p class="mb-0"><code>score.py</code> tests the AI <strong>without</strong> remembered answers; otherwise every test picture would simply be recalled and score 100%. Add <code>--recall</code> to test the memory instead.</p></div></div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 7. WHY -->
+  <section id="why" class="mb-5">
+    <h2 class="section-title">7. Why Training Takes a Few Nights</h2>
+    <p>Training is millions of small multiplications repeated hundreds of thousands of times. Big AI labs do this on graphics cards (GPUs) that run thousands of multiplications at once. This computer has <strong>no such graphics card</strong>: a 4-core Intel Pentium Silver N5030 processor does all the work. It was measured on 2026-10-18:</p>
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered bg-white">
+        <thead><tr><th>Item</th><th class="num-cell">Value</th></tr></thead>
+        <tbody>
+          <tr><td>Time per practice picture (guess + mark + nudge), 256 px</td><td class="num-cell">≈ 0.4 s</td></tr>
+          <tr><td>Practice pictures</td><td class="num-cell">20,000</td></tr>
+          <tr><td>Epochs needed for a good first model</td><td class="num-cell">≈ 10</td></tr>
+          <tr><td>20,000 × 10 × 0.4 s</td><td class="num-cell"><strong>≈ 22 hours</strong> (19–23 h)</td></tr>
+          <tr><td>So, with 8 hours a night</td><td class="num-cell"><strong>about 3 nights</strong></td></tr>
+          <tr><td>Fine-tuning later on new real pairs</td><td class="num-cell">1–2 hours</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6"><div class="card shadow-sm accent-blue h-100"><div class="card-body">
+        <h5 class="card-title">Why so many repetitions?</h5>
+        <p class="mb-0">Each nudge is deliberately tiny. Big nudges would make the model chase the last picture it saw and forget the others. Many small nudges over many different pictures make it learn what <em>all</em> ribbons have in common. 10 epochs means every practice picture is seen about 10 times, each time with a different photo look.</p>
+      </div></div></div>
+      <div class="col-md-6"><div class="card shadow-sm accent-green h-100"><div class="card-body">
+        <h5 class="card-title">Why at night, and why that's safe</h5>
+        <p class="mb-0">Training keeps all 4 processor cores busy, so the computer is slow for other work. At night nobody notices. It <strong>resumes where it stopped</strong>: <code>--hours 8</code> stops after 8 hours, and the next night simply continues. Ctrl+C, a crash or a restart lose at most 10 minutes. A free cloud GPU (Kaggle, Colab) could do it in about an hour; that's allowed for the synthetic pictures only.</p>
+      </div></div></div>
+    </div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 8. NIGHT -->
+  <section id="night" class="mb-5">
+    <h2 class="section-title">8. What Happens During the Night</h2>
+    <div class="diagram mb-2">
+      <svg viewBox="0 0 760 190" role="img" aria-label="A night of training: epochs one after another, a checkpoint every 10 minutes, an exam after each epoch">
+        <text class="dg-title" x="10" y="20">One night (8 hours)</text>
+        <g>
+          <rect x="10" y="50" width="225" height="36" fill="#cfe2ff" stroke="#0d6efd"/><text class="dg-boxtxt" x="122" y="73">epoch 1 (~2.2 h)</text>
+          <rect x="240" y="50" width="225" height="36" fill="#cfe2ff" stroke="#0d6efd"/><text class="dg-boxtxt" x="352" y="73">epoch 2</text>
+          <rect x="470" y="50" width="225" height="36" fill="#cfe2ff" stroke="#0d6efd"/><text class="dg-boxtxt" x="582" y="73">epoch 3</text>
+          <rect x="700" y="50" width="50" height="36" fill="#e9ecef" stroke="#adb5bd"/><text class="dg-small" x="725" y="73" text-anchor="middle">4…</text>
+        </g>
+        <g stroke="#6c757d" stroke-width="1.2">
+          <line x1="40" y1="88" x2="40" y2="98"/><line x1="70" y1="88" x2="70" y2="98"/><line x1="100" y1="88" x2="100" y2="98"/><line x1="130" y1="88" x2="130" y2="98"/><line x1="160" y1="88" x2="160" y2="98"/><line x1="190" y1="88" x2="190" y2="98"/><line x1="220" y1="88" x2="220" y2="98"/>
+          <line x1="270" y1="88" x2="270" y2="98"/><line x1="300" y1="88" x2="300" y2="98"/><line x1="330" y1="88" x2="330" y2="98"/><line x1="360" y1="88" x2="360" y2="98"/><line x1="390" y1="88" x2="390" y2="98"/><line x1="420" y1="88" x2="420" y2="98"/><line x1="450" y1="88" x2="450" y2="98"/>
+          <line x1="500" y1="88" x2="500" y2="98"/><line x1="530" y1="88" x2="530" y2="98"/><line x1="560" y1="88" x2="560" y2="98"/><line x1="590" y1="88" x2="590" y2="98"/><line x1="620" y1="88" x2="620" y2="98"/><line x1="650" y1="88" x2="650" y2="98"/><line x1="680" y1="88" x2="680" y2="98"/>
+        </g>
+        <text class="dg-small" x="10" y="114">| = last.pt saved every 10 minutes (safe to stop any time)</text>
+        <g class="dg-nb"><circle cx="237" cy="40" r="9"/><text x="237" y="40">✓</text><circle cx="467" cy="40" r="9"/><text x="467" y="40">✓</text><circle cx="697" cy="40" r="9"/><text x="697" y="40">✓</text></g>
+        <text class="dg-small" x="750" y="16" text-anchor="end">✓ = exam on the 1,000 validation pictures; best so far → best.pt</text>
+        <text class="dg-note" x="10" y="150">Inside every epoch: 2,500 steps × (8 pictures: photo look → guess → mark → nudge)</text>
+        <text class="dg-note" x="10" y="172">The nudges get gentler over time ("learning rate" from 0.002 down towards 0), so the model settles.</text>
+      </svg>
+    </div>
+    <div class="diagram-caption mb-3">A night of training, with the steps it repeats, its safety saves and its exams.</div>
+    <div class="step-box">
+      <div class="step-bar">NIGHT 1 <span class="step-title">— Start</span></div>
+      <div class="step-body">
+        <p class="mb-0">It loads the practice pictures, builds the model (random at first), and writes <em>"training seg-v1: 20000 pictures per epoch (2500 steps of 8) …"</em>. If <code>runs\seg-v1\last.pt</code> exists, it says <em>"resuming: epoch 3, step 7500 …"</em> instead and continues.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">EVERY STEP <span class="step-title">— about 3 seconds</span></div>
+      <div class="step-body">
+        <p class="mb-0">8 practice pictures get a fresh photo look, the model guesses, the guesses are marked (loss), and every weight is nudged. Every 20 steps (about a minute) one progress line is printed and added to the log.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">EVERY 10 MINUTES <span class="step-title">— safety save</span></div>
+      <div class="step-body">
+        <p class="mb-0">Everything is saved to <code>runs\seg-v1\last.pt</code>: the model, the optimizer and the progress counters. If the computer sleeps, restarts or you press Ctrl+C, at most 10 minutes are lost.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">EVERY EPOCH <span class="step-title">— about 2–2.5 hours: the exam</span></div>
+      <div class="step-body">
+        <p class="mb-0">The model is tested on the 1,000 validation pictures it never practises on. It prints <em>"validation IoU {ribbon, text, center} score …"</em>. If the score is its best so far, the model is copied to <code>runs\seg-v1\best.pt</code>: that's the one you publish later.</p>
+      </div>
+    </div>
+    <div class="step-box">
+      <div class="step-bar">MORNING <span class="step-title">— stop, look, maybe publish</span></div>
+      <div class="step-body">
+        <p>After <code>--hours</code> it stops by itself: <em>"stopped; saved … Best validation score 0.xxx"</em>. Look at the log (section 9). When the best score is <strong>0.6 or more</strong>, publish and test:</p>
+        <p class="mb-0"><code>python export_onnx.py</code> → restart FlowTrace → <code>python score.py</code>. If the score is still lower, export refuses to publish, and the app keeps using classic vision.</p>
+      </div>
+    </div>
+    <div class="card shadow-sm accent-red"><div class="card-body">
+      <h5 class="card-title">Before you leave it overnight</h5>
+      <ul class="mb-0">
+        <li>Plug in the charger. In Windows Settings → <em>Power</em>, set "Sleep" to <strong>Never</strong> while plugged in. A sleeping laptop pauses training (it resumes when it wakes up).</li>
+        <li>Close FlowTrace and other heavy programs. Training wants all 4 cores.</li>
+        <li>Expect the fan to run and the laptop to get warm. That's normal.</li>
+      </ul>
+    </div></div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 9. MONITOR -->
+  <section id="monitor" class="mb-5">
+    <h2 class="section-title">9. Watching the Progress</h2>
+    <p>Everything training prints is also written, with the time, to <code>AI\train\runs\seg-v1\train-log.txt</code>. You can watch it in three ways:</p>
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered bg-white">
+        <thead><tr><th>How</th><th>What you see</th></tr></thead>
+        <tbody>
+          <tr><td>The training window itself</td><td>A new line about every minute.</td></tr>
+          <tr><td>A second PowerShell window, live:<br><span class="kbd-like">Get-Content AI\train\runs\seg-v1\train-log.txt -Wait -Tail 20</span></td><td>The last 20 lines, updating as training writes. Close it any time; training continues.</td></tr>
+          <tr><td>In the morning: open <code>train-log.txt</code> in Notepad</td><td>The whole night, with times. Search for "validation" to see the exams.</td></tr>
+          <tr><td>Task Manager → Performance → CPU</td><td>Near 100% means it's working. Near 0% means it stopped or the laptop slept.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h5>Reading a progress line</h5>
+    <div class="code-window">
+      <div class="code-titlebar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="code-filename">AI\train\runs\seg-v1\train-log.txt</span></div>
+<pre><code class="language-plaintext">2026-10-19 01:42:10  epoch 0 (45%) step 1120 loss 1.214 ribbon 0.412 text 0.903 center 0.866 lr 0.00199 1.00 h
+2026-10-19 03:05:51  epoch 0 finished in 141 min
+2026-10-19 03:09:30  validation IoU {'ribbon': 0.712, 'text': 0.284, 'center': 0.391} score 0.525
+2026-10-19 03:09:30    new best -&gt; best.pt
+2026-10-19 08:00:02  stopped; saved ...\last.pt. Run again to continue. Best validation score 0.668.</code></pre>
+    </div>
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered bg-white">
+        <thead><tr><th>Part</th><th>Meaning</th><th>Good sign</th></tr></thead>
+        <tbody>
+          <tr><td>epoch 0 (45%)</td><td>Which pass through the practice pictures, and how far through it</td><td>Rises steadily</td></tr>
+          <tr><td>step 1120</td><td>Total nudges so far (all nights together)</td><td>Rises ~1,200 per hour</td></tr>
+          <tr><td>loss 1.214</td><td>How wrong the guesses were on the last 8 pictures (all three layers together)</td><td>Falls; it jumps around from line to line, so watch the trend over an hour</td></tr>
+          <tr><td>ribbon / text / center</td><td>The loss for each layer separately</td><td>Ribbon falls first; text and center, the harder ones, later</td></tr>
+          <tr><td>lr 0.00199</td><td>Learning rate: how big the nudges are</td><td>Slowly falls by design</td></tr>
+          <tr><td>1.31 h</td><td>Total training time so far</td><td>—</td></tr>
+          <tr><td>validation IoU</td><td>Exam result per layer: overlap between guess and answer on unseen pictures (0–1)</td><td>Rises epoch after epoch</td></tr>
+          <tr><td>score</td><td>One number: ½ ribbon + ¼ text + ¼ center</td><td><strong>≥ 0.6 to publish</strong>; 0.75+ is good</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="diagram mb-2">
+      <svg viewBox="0 0 760 200" role="img" aria-label="What healthy training looks like: loss falls quickly then slowly, validation score rises then levels off">
+        <line x1="50" y1="170" x2="360" y2="170" class="dg-line"/><line x1="50" y1="20" x2="50" y2="170" class="dg-line"/>
+        <text class="dg-small" x="205" y="190" text-anchor="middle">hours of training →</text>
+        <text class="dg-small" x="20" y="95" transform="rotate(-90 20 95)" text-anchor="middle">loss</text>
+        <path d="M 52 30 C 90 120 140 140 200 150 S 330 158 358 160" fill="none" stroke="#dc3545" stroke-width="2.5"/>
+        <path d="M 52 40 L 60 60 L 66 52 L 74 85 L 82 78 L 92 104 L 100 98" fill="none" stroke="#dc3545" stroke-width="1" opacity=".5"/>
+        <text class="dg-note" x="210" y="130">falls fast, then slowly</text>
+        <line x1="440" y1="170" x2="750" y2="170" class="dg-line"/><line x1="440" y1="20" x2="440" y2="170" class="dg-line"/>
+        <text class="dg-small" x="595" y="190" text-anchor="middle">epochs →</text>
+        <text class="dg-small" x="410" y="95" transform="rotate(-90 410 95)" text-anchor="middle">validation score</text>
+        <line x1="440" y1="80" x2="750" y2="80" stroke="#198754" stroke-dasharray="5 4"/>
+        <text class="dg-small" x="745" y="74" text-anchor="end">0.6 = good enough to publish</text>
+        <g fill="#0d6efd"><circle cx="470" cy="128" r="4"/><circle cx="510" cy="100" r="4"/><circle cx="550" cy="84" r="4"/><circle cx="590" cy="72" r="4"/><circle cx="630" cy="65" r="4"/><circle cx="670" cy="61" r="4"/><circle cx="710" cy="60" r="4"/></g>
+        <path d="M 470 128 L 510 100 L 550 84 L 590 72 L 630 65 L 670 61 L 710 60" fill="none" stroke="#0d6efd" stroke-width="1.5"/>
+        <text class="dg-note" x="560" y="120">rises, then levels off</text>
+      </svg>
+    </div>
+    <div class="diagram-caption mb-3">What healthy training looks like. When the score stops rising for 2–3 epochs, more nights won't help much. Add real pairs instead.</div>
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered bg-white">
+        <thead><tr><th>If you see…</th><th>It means…</th><th>Do this</th></tr></thead>
+        <tbody>
+          <tr><td>No new lines for 10+ minutes; CPU near 0%</td><td>The laptop slept, or the window was closed</td><td>Run the same command again; it resumes from <code>last.pt</code></td></tr>
+          <tr><td>Loss stays flat from the very start</td><td>Something is wrong with the data</td><td>Check that <code>AI\data\synthetic\train</code> has pictures (<code>render.py</code>)</td></tr>
+          <tr><td>Validation score goes <em>down</em> two epochs in a row</td><td>It's starting to memorize the practice pictures</td><td>Stop; <code>best.pt</code> already holds the best version. Make more pictures or real pairs</td></tr>
+          <tr><td>"Not published: validation score 0.4 is below 0.6"</td><td>Not trained enough yet</td><td>Another night of training</td></tr>
+          <tr><td>FlowTrace prints "FlowTrace-Seg result looks wrong …; using classic"</td><td>The safety net caught the model on that picture</td><td>Train longer, or add real pairs that look like that picture</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card shadow-sm accent-green"><div class="card-body"><p class="mb-0"><strong>The final judge is <code>score.py</code></strong>, not the log. The log's exam uses synthetic pictures; <code>score.py</code> uses your real ones. Only keep a new model if <code>score.py</code> shows equal or better numbers than before. (The old model is kept as <code>flowtrace-seg.onnx.bak</code>.)</p></div></div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+  <!-- 10. CHEAT SHEET -->
+  <section id="cheat" class="mb-5">
+    <h2 class="section-title">10. Commands, Files and Glossary</h2>
+    <div class="code-window">
+      <div class="code-titlebar"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span><span class="code-filename">Command Prompt — the whole training routine</span></div>
+<pre><code class="language-plaintext">rem once: make the practice pictures (about 2-3 hours)
+cd C:\Daya\RAGchamp\FLOW-CHART-APP\AI\datagen
+python -m playwright install chromium
+python render.py
+
+rem every night: train for 8 hours (continues where it stopped)
+cd C:\Daya\RAGchamp\FLOW-CHART-APP\AI\train
+python train_seg.py --hours 8
+
+rem watch it live from a second PowerShell window
+Get-Content C:\Daya\RAGchamp\FLOW-CHART-APP\AI\train\runs\seg-v1\train-log.txt -Wait -Tail 20
+
+rem when the best score is 0.6 or more: publish, restart FlowTrace, measure
+python export_onnx.py
+cd ..\eval
+python score.py
+
+rem your corrected pictures: Save training pair -> put zips in AI\data\real, then
+cd ..\datagen
+python real_to_masks.py
+cd ..\train
+python train_seg.py --hours 2</code></pre>
+    </div>
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered bg-white">
+        <thead><tr><th>Folder / file</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><code>AI\start-flowtrace.bat</code></td><td>Starts the FlowTrace service for Trace it</td></tr>
+          <tr><td><code>AI\service\</code></td><td>The trace pipeline of section 2 (one file per step) and the server</td></tr>
+          <tr><td><code>AI\datagen\</code></td><td>Practice-picture maker (<code>random_doc.js</code>, <code>render.py</code>) and answer-key tools (<code>real_to_masks.py</code>, <code>answer_pair.py</code>, <code>render_pair.py</code>)</td></tr>
+          <tr><td><code>AI\train\</code></td><td>The model (<code>model_seg.py</code>), practice-picture loader with the photo look (<code>dataset.py</code>), training (<code>train_seg.py</code>), publishing (<code>export_onnx.py</code>)</td></tr>
+          <tr><td><code>AI\train\runs\seg-v1\</code></td><td><code>last.pt</code> (safety save), <code>best.pt</code> (best exam score), <code>train-log.txt</code> (progress)</td></tr>
+          <tr><td><code>AI\models\</code></td><td><code>flowtrace-seg.onnx</code> (the published model) and its model card <code>.json</code></td></tr>
+          <tr><td><code>AI\data\synthetic\</code>, <code>AI\data\real\</code>, <code>…\real\test\</code></td><td>Practice pictures; your pairs (also remembered); the frozen test set</td></tr>
+          <tr><td><code>AI\eval\score.py</code>, <code>report.html</code></td><td>The honest score on real pictures, and the side-by-side report</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered glossary-table bg-white">
+        <thead><tr><th>Word</th><th>Plain meaning</th></tr></thead>
+        <tbody>
+          <tr><td>Weights</td><td>The model's 250,000 adjustable numbers. Training is changing them.</td></tr>
+          <tr><td>Step / batch</td><td>One nudge, made after looking at 8 pictures together.</td></tr>
+          <tr><td>Epoch</td><td>One pass through all practice pictures.</td></tr>
+          <tr><td>Loss</td><td>How wrong the guesses were. Lower is better.</td></tr>
+          <tr><td>Learning rate</td><td>How big each nudge is. It shrinks over time so the model settles.</td></tr>
+          <tr><td>IoU</td><td>"Intersection over union": the overlap between guess and answer, from 0 (none) to 1 (identical).</td></tr>
+          <tr><td>Validation set</td><td>Practice-style pictures kept aside for the exam after each epoch.</td></tr>
+          <tr><td>Test set</td><td>Your real answer keys in <code>data\real\test</code>, used only by <code>score.py</code>.</td></tr>
+          <tr><td>Checkpoint</td><td>A saved copy of the model in training (<code>last.pt</code>, <code>best.pt</code>).</td></tr>
+          <tr><td>ONNX</td><td>A standard file format for a finished model, which FlowTrace loads quickly.</td></tr>
+          <tr><td>Overfitting</td><td>Memorizing the practice pictures instead of learning the general idea: the exam score drops.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="back-to-top mt-2"><a href="#toc">↑ Back to Table of Contents</a></p>
+  </section>
+
+</main>
+
+<footer class="text-white py-4 mt-5">
+  <div class="container text-center small">
+    How the Flow Chart AI model works: FlowTrace (<code class="text-white">FLOW-CHART-APP\AI</code>). Using Trace it: <a href="guide.html#aitrace">guide.html §11</a>. Design and decisions: <a href="FLOW-CHART-AI-PLAN.md">FLOW-CHART-AI-PLAN.md</a>. Commands: <code class="text-white">AI\README.md</code>.
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/build/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

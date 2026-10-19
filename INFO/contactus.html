@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — Flow Chart Builder</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  :root{
+    --biz-blue:#0d6efd;
+    --biz-blue-dark:#084298;
+    --nav-blue:#04264d;
+    --nav-yellow:#ffd60a;
+    --biz-yellow:#ffc107;
+  }
+  body{ background:#f7f8fa; margin:0; }
+
+  /* Sticky top nav: deep blue background, yellow font */
+  .topnav{
+    position:sticky; top:0; z-index:1030;
+    background:var(--nav-blue);
+    color:var(--nav-yellow);
+    padding:.9rem 1.5rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 .15rem .5rem rgba(0,0,0,.25);
+  }
+  .topnav .brand{
+    display:inline-flex; align-items:center;
+    font-weight:700; font-size:2.2rem; letter-spacing:.03em;
+    color:var(--nav-yellow); text-decoration:none;
+  }
+  .topnav .brand-logo{ height:44px; width:auto; display:block; }
+  .topnav .tagline{
+    font-weight:600; font-size:1.05rem; color:var(--nav-yellow);
+    letter-spacing:.15em; word-spacing:.6em; font-style:italic;
+  }
+  @media (max-width:576px){
+    .topnav{ flex-direction:column; text-align:center; gap:.15rem; padding:.75rem 1rem; }
+  }
+
+  .hero{
+    background:#f7f8fa;
+    padding-top:2rem;
+    padding-bottom:2rem;
+  }
+  .hero-subtitle{
+    font-size:1.25rem;
+    background:#5BF527;
+    color:#000;
+    padding:1rem 1.25rem;
+    border-radius:.375rem;
+  }
+  @media (max-width:768px){
+    .hero-subtitle{ font-size:1rem; }
+  }
+  @media (max-width:480px){
+    .hero-subtitle{ font-size:.85rem; }
+  }
+  .section-title{
+    display:inline-flex; align-items:center; gap:.6rem;
+    padding-bottom:.4rem; border-bottom:3px solid var(--biz-blue);
+    margin-bottom:1.25rem;
+  }
+  .about-card h2{
+    color:var(--nav-blue);
+    font-size:1.35rem;
+    font-weight:700;
+    margin-top:2rem;
+    margin-bottom:.75rem;
+  }
+  .about-card h2:first-child{ margin-top:0; }
+  .about-card p{ line-height:1.7; }
+  .about-card ul{ line-height:1.7; }
+  .linkedin-btn{
+    display:inline-flex; align-items:center; gap:.5rem;
+    background:var(--nav-blue); color:#fff; font-weight:600;
+    padding:.6rem 1.25rem; border-radius:.375rem; text-decoration:none;
+  }
+  .linkedin-btn:hover{ background:#08386e; color:#fff; }
+  .story-figure img{ max-width:100%; height:auto; border:1px solid #d7dae0; border-radius:.375rem; }
+  .story-figure figcaption{ font-size:.9rem; color:#6c757d; margin-top:.5rem; }
+  footer{ background:var(--nav-blue); }
+  footer a{ color:#fff; }
+</style>
+</head>
+<body>
+
+<!-- STICKY TOP NAV -->
+<div class="topnav">
+  <span class="brand">
+    <svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" role="img" aria-label="RAG Champ logo">
+      <circle cx="24" cy="24" r="19" fill="#5BF527"/>
+      <path d="M24,5 A19,19 0 0,0 24,43 A9.5,9.5 0 0,0 24,24 A9.5,9.5 0 0,1 24,5 Z" fill="#FA0C00"/>
+      <text x="58" y="33" font-family="'Segoe UI', Verdana, Arial, sans-serif" font-weight="700" font-size="26" letter-spacing="0.3" fill="#ffd60a">RAG Champ</text>
+    </svg>
+  </span>
+  <div class="tagline">FLOW CHART BUILDER</div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container text-center">
+    <p class="lead mb-0 fst-italic fw-bold hero-subtitle">The story behind Flow Chart Builder, and the person who built it</p>
+  </div>
+</header>
+
+<main class="container mb-5">
+
+  <section id="contact">
+    <div class="card shadow-sm">
+      <div class="card-body p-4 p-md-5 about-card">
+
+        <div class="text-center mb-4 d-flex flex-column flex-md-row justify-content-center gap-3">
+          <a class="linkedin-btn" href="https://www.linkedin.com/in/dayanand-menashi-04969aba/" target="_blank" rel="noopener">
+            Connect with me on LinkedIn
+          </a>
+          <a class="linkedin-btn" href="mailto:d_menashi@yahoo.com">
+            Email me: d_menashi@yahoo.com
+          </a>
+        </div>
+        <p class="text-center fst-italic text-muted mb-4">Yes, a Yahoo email - I love to hold on to old stuff — Yahoo Mail is one of them (right up there with my collection of USB flash drives I have no computer left to plug into).</p>
+
+        <h2>About Me</h2>
+        <p>I am Daya, an AI professional. I started my tech career in 1997 working on COBOL mainframe. My experience has spanned Mainframe, Web technologies, Data Engineering, and AI — developing innovative tech solutions for some of the world's largest Insurance and Financial Services organizations. Throughout my career, I have helped organizations build, modernize, and scale mission-critical applications that power core business operations.</p>
+
+        <p>Currently my focus is AI Engineering, where I combine decades of software engineering principles with the latest advances in large language models, agentic AI, and intelligent automation. I learn best by building, and Flow Chart Builder is one of the things that learning has produced.</p>
+
+        <h2>How This Tool Came to Be</h2>
+        <p>It started with a single diagram. While learning about AI, I came across a complex flow chart: curved arc bands, Bézier ribbons, arrows, icons, and labels layered on top of each other. I wanted to replicate it, but not as a copy. I wanted the same shape with my own story in it. Every label, every word, and every color had to be mine to change freely, while the structure and geometry of the diagram stayed exactly the same.</p>
+
+        <figure class="story-figure text-center my-4">
+          <a href="https://ragchamp.github.io/FLOWCHART/Sample-flow-diag.jpg" target="_blank" rel="noopener">
+            <img src="https://ragchamp.github.io/FLOWCHART/Sample-flow-diag.jpg" alt="The complex sample flow chart diagram that started this project" loading="lazy">
+          </a>
+          <figcaption>The diagram that started it all. Click to open it full size.</figcaption>
+        </figure>
+
+        <p>My first thought was simple: I would hand the picture to Claude and it would recreate it for me. I uploaded the image, described what I wanted, and waited for a faithful, editable version.</p>
+
+        <p>It didn't work. I tried again with more detailed prompts, then by breaking the diagram into pieces, then by describing the shapes in words. Each attempt came close in places and drifted in others. Arcs bent the wrong way, bands lost their proportions, and elements slipped out of alignment. After many unsuccessful attempts, I learned something more useful than any single diagram: as of October 2026, a model on its own can't reliably replicate a complex flow chart image. It needs a harness, a purpose-built tool around it that gives it real shapes to work with, precise coordinates, and a structure it can edit without guessing. Maybe a future model will do it from a picture alone. For now, the tool makes the difference.</p>
+
+        <p>That realization changed the project. Instead of asking Claude to draw the diagram, I started building the tool with Claude's help. The result is Flow Chart Builder: you trace over a reference image with arcs, Bézier bands, arrows, circles, icons, and text, then save the whole diagram as JSON. Because the diagram is data, you can change any label or color whenever you like, and the shape stays exactly where you put it.</p>
+
+        <h2>Where This Is Heading</h2>
+        <p>Flow Chart Builder is a work in progress, and I plan to keep improving it. My goal is to add more automation features so that anyone can build complex flow diagrams quickly, spending less time placing shapes by hand and more time on the message the diagram is meant to tell.</p>
+
+        <p>If you have ideas, feature requests, or a diagram that pushes the tool to its limits, I'd love to hear from you. Reach out on LinkedIn or by email.</p>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="text-white py-4 mt-5">
+  <div class="container text-center small">
+    <a href="guide.html" class="text-white text-decoration-underline me-3">User Guide</a>
+    <a href="contactus.html" class="text-white text-decoration-underline">Contact Us</a>
+  </div>
+</footer>
+
+</body>
+</html>
